@@ -1,0 +1,51 @@
+---
+title: "Post template (draft, not a real post)"
+date: "2026-01-01"
+summary: "A formatting reference for writing new posts. It is a draft, so it never appears in production builds."
+tags:
+  - template
+draft: true
+---
+
+This file is a **formatting template**, not an article. It has `draft: true`, so production
+builds leave it out and it shows up only under `npm run dev`. Copy it, rename the copy to your
+post's slug, replace the frontmatter and write.
+
+## Headings and text
+
+Use `##` and `###` for sections, since the page already renders the title as the top heading.
+Paragraphs, **bold**, _italics_, `inline code` and [links](https://nextjs.org) all work.
+
+- Lists work
+- So do [GFM](https://github.github.com/gfm/) tables and task lists
+
+> Blockquotes are styled too.
+
+| Column | Column |
+| ------ | ------ |
+| Cell   | Cell   |
+
+## Code blocks
+
+Put the language after the opening fence for syntax highlighting.
+
+```python
+def greet(name: str) -> str:
+    # A neutral formatting example.
+    return f"Hello, {name}"
+
+
+print(greet("reader"))
+```
+
+## Images
+
+Put images in `public/blog/<post-slug>/` and reference them with an absolute path. Alt text is
+required and the build stops without it. The optional quoted title becomes a caption.
+
+![Grey placeholder panel labelled template image](/blog/post-template/example.png "Optional caption goes here.")
+
+## Before you publish
+
+Check every screenshot for IP addresses, client names and tokens, and strip image metadata.
+The README has the full checklist.

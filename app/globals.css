@@ -1,26 +1,422 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---- Design tokens ---------------------------------------------------- */
+
+@theme {
+  /* Near-black surfaces, one cool neutral family. */
+  --color-ink-950: #05070b;
+  --color-ink-900: #080b11;
+  --color-ink-850: #0b0f16;
+  --color-ink-800: #10151e;
+  --color-line: #232b37;
+  --color-line-strong: #3a4656;
+
+  /* Text. All clear 4.5:1 on ink-800 and darker. */
+  --color-fg: #f2f6fb;
+  --color-fg-muted: #a9b5c6;
+  --color-fg-dim: #8592a6;
+
+  /* The single accent: electric blue and its tints. */
+  --color-accent: #1f7fff;
+  --color-accent-soft: #6db3ff;
+  --color-accent-pale: #cfe5ff;
+  --color-accent-deep: #0a3a94;
+  --color-on-accent: #03060c;
+
+  --breakpoint-xs: 26rem;
+  --spacing-gutter: clamp(1rem, 2.4vw, 2.25rem);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --default-mono-font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Tokens used outside utilities. */
+:root {
+  color-scheme: dark;
+  --gradient-hero: linear-gradient(
+    180deg,
+    var(--color-ink-950) 0%,
+    var(--color-ink-950) 22%,
+    #071531 42%,
+    #0a3a94 62%,
+    #1f7fff 80%,
+    #8cc3ff 93%,
+    #e6f2ff 100%
+  );
+  --gradient-page: linear-gradient(
+    180deg,
+    var(--color-ink-950) 0%,
+    var(--color-ink-950) 45%,
+    #07193b 78%,
+    #0d4ec0 100%
+  );
+  --gradient-band: linear-gradient(180deg, #0a3a94 0%, #1f7fff 62%, #6db3ff 100%);
+  /* Stays dark enough for white text across its whole range. */
+  --gradient-cell: linear-gradient(200deg, #0a3a94 0%, #1565e0 100%);
+  --plus-grid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 17v10M17 22h10' stroke='%23cfe5ff' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+}
+
+/* ---- Base ------------------------------------------------------------- */
+
+@layer base {
+  html {
+    background: var(--color-ink-950);
+    scroll-behavior: smooth;
+    /* Keeps anchors and keyboard focus clear of the sticky header. */
+    scroll-padding-top: 4rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-ink-950);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  /* Two-tone ring: visible on near-black, on blue and on the white hero glow. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent-pale);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--color-ink-950);
+  }
+
+  @media (min-width: 48rem) {
+    html {
+      scroll-padding-top: 5.5rem;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---- Display type ----------------------------------------------------- */
+
+@utility type-poster {
+  font-family: var(--font-sans);
+  font-stretch: 62%;
+  font-weight: 900;
+  line-height: 0.86;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  word-spacing: 0.1em;
+}
+
+@utility type-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Mono uppercase headline. */
+@utility type-headline {
+  font-family: var(--font-mono);
+  font-weight: 300;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+/*
+ * The wordmark fills its container exactly. Font size is a fixed ratio of the
+ * container width, measured against Archivo at wdth 62 / wght 900, so it can
+ * never overflow at any viewport and needs no JavaScript to fit.
+ */
+.wordmark {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.wordmark__text {
+  --wm-ratio-stacked: 0.1642;
+  --wm-ratio-inline: 0.137;
+  display: block;
+  white-space: nowrap;
+  font-size: calc(100cqw * var(--wm-ratio-stacked));
+}
+
+.wordmark__line {
+  display: block;
+  overflow: clip;
+  padding-block: 0.02em 0.01em;
+}
+
+.wordmark__letter {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* One line from tablet up, with a word space between the lines. */
+@media (min-width: 48rem) {
+  .wordmark__text {
+    font-size: calc(100cqw * var(--wm-ratio-inline));
+  }
+
+  .wordmark__line {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  .wordmark__line + .wordmark__line {
+    margin-left: 0.2em;
+  }
+}
+
+/* ---- Textures --------------------------------------------------------- */
+
+.plus-grid {
+  background-image: var(--plus-grid);
+  background-size: 44px 44px;
+  background-position: center top;
+}
+
+/* Corner registration marks on framed panels. */
+.frame-ticks::before,
+.frame-ticks::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  pointer-events: none;
+  border-color: var(--color-accent-soft);
+  border-style: solid;
+}
+
+.frame-ticks::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.frame-ticks::after {
+  right: -1px;
+  bottom: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+/* ---- Entrance failsafe ------------------------------------------------ */
+
+/*
+ * Hero elements are the only content that starts hidden. CSS, not JavaScript,
+ * guarantees they appear: this runs even if the bundle is slow or blocked. Once
+ * framer-motion hydrates in time it sets data-armed and takes over.
+ */
+@keyframes entrance-failsafe {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.75rem, 0);
+  }
+}
+
+.entrance-failsafe {
+  animation: entrance-failsafe 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.9s backwards;
+}
+
+.entrance-failsafe[data-armed] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrance-failsafe {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@media print {
+  [data-reveal],
+  .entrance-failsafe,
+  .wordmark__letter {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---- Logo marquee ------------------------------------------------------ */
+
+/*
+ * The track holds identical sets and moves by exactly one of them, so the loop point
+ * is invisible. Gap and duration change together to keep the speed constant.
+ */
+@keyframes marquee-scroll {
+  to {
+    transform: translate3d(calc(-100% / var(--marquee-copies)), 0, 0);
+  }
+}
+
+.marquee {
+  --marquee-gap: 4rem;
+  --marquee-duration: var(--marquee-duration-narrow);
+}
+
+@media (min-width: 48rem) {
+  .marquee {
+    --marquee-gap: 6.625rem;
+    --marquee-duration: var(--marquee-duration-wide);
+  }
+}
+
+.marquee__viewport {
+  overflow: clip;
+  /* Room for the active item's outline, which the clip would otherwise cut off. */
+  padding-block: 0.75rem;
+  /* Measured from the reference: fades in between 1% and 20% from each edge. */
+  mask-image: linear-gradient(to right, transparent 1%, black 20%, black 80%, transparent 99%);
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-scroll var(--marquee-duration) linear infinite;
+}
+
+.marquee__set {
+  display: flex;
+  flex: none;
+}
+
+/* Padding, not `gap`, so the space across the loop point is identical. */
+.marquee__item {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: calc(var(--marquee-gap) / 2);
+}
+
+.marquee__trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  outline-offset: 0.5rem;
+}
+
+/* Stops on hover with no JavaScript. The inspector keeps it stopped while its screen is open. */
+.marquee__track:has(.marquee__trigger:hover),
+.marquee-inspector[data-inspecting] .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__trigger[data-active] {
+  outline: 1px solid var(--color-accent-soft);
+}
+
+.marquee__toggle {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  min-height: 2.75rem;
+  align-items: center;
+  /* Lines up with the right edge of Container, which caps at 100rem. */
+  margin: 1rem calc(max(0px, (100% - 100rem) / 2) + var(--spacing-gutter)) 0 auto;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--color-line-strong);
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.marquee__toggle:hover {
+  border-color: var(--color-accent-soft);
+  color: var(--color-fg);
+}
+
+.marquee__toggle:has(:focus-visible) {
+  outline: 2px solid var(--color-accent-pale);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-ink-950);
+}
+
+.marquee__toggle-paused {
+  display: none;
+}
+
+.marquee:has(.marquee__toggle-input:checked) .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee:has(.marquee__toggle-input:checked) .marquee__toggle-pause {
+  display: none;
+}
+
+.marquee:has(.marquee__toggle-input:checked) .marquee__toggle-paused {
+  display: inline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__viewport {
+    mask-image: none;
+    padding-inline: var(--spacing-gutter);
+  }
+
+  .marquee__track {
+    width: auto;
+    animation: none;
+    will-change: auto;
+  }
+
+  .marquee__set {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 2.5rem;
+  }
+
+  .marquee__set[data-marquee-clone],
+  .marquee__toggle {
+    display: none;
+  }
+}
+
+@media print {
+  .marquee__viewport {
+    mask-image: none;
+  }
+
+  .marquee__track {
+    width: auto;
+    animation: none;
+  }
+
+  .marquee__set {
+    flex-wrap: wrap;
+  }
+
+  .marquee__set[data-marquee-clone],
+  .marquee__toggle {
+    display: none;
+  }
+}
+
+/* ---- Blog code blocks (rehype-pretty-code output) ---------------------- */
+
+[data-rehype-pretty-code-figure] {
+  margin-block: 1.75rem;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  padding: 1rem 1.125rem;
+  background: var(--color-ink-850);
+  border: 1px solid var(--color-line);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+[data-rehype-pretty-code-figure] code {
+  display: grid;
+  min-width: max-content;
+  font-family: var(--font-mono);
 }
